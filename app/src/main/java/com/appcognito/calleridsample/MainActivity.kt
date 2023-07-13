@@ -38,6 +38,8 @@ class MainActivity : ComponentActivity() {
             arrayOf(
                 android.Manifest.permission.READ_PHONE_STATE,
                 android.Manifest.permission.READ_PHONE_NUMBERS,
+                android.Manifest.permission.READ_CALL_LOG,
+                android.Manifest.permission.READ_CONTACTS,
                 android.Manifest.permission.INTERNET
             )
         )
@@ -68,7 +70,7 @@ private val onResult: (String, String?, Uri?) -> Unit = { phone, name, photoUri 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!",
+        text = "CallerID Sample! - $name",
         modifier = modifier
     )
 }

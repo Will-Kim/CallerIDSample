@@ -8,6 +8,8 @@ import android.os.CancellationSignal
 import android.provider.CallLog
 import android.provider.ContactsContract
 import android.telephony.TelephonyManager
+import android.util.Log
+import androidx.core.app.NotificationCompat
 
 class CustomPhoneStateReceiver(private val onResult: (String, String?, Uri?) -> Unit) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
@@ -17,7 +19,26 @@ class CustomPhoneStateReceiver(private val onResult: (String, String?, Uri?) -> 
         val incomingNumber = intent?.getStringExtra("incoming_number")
 
         if (state == TelephonyManager.EXTRA_STATE_RINGING || state == TelephonyManager.EXTRA_STATE_OFFHOOK) {
-            println("TelephonyManager.CALL_STATE_RINGING onReceive -> $incomingNumber")
+//            println("TelephonyManager.CALL_STATE_RINGING onReceive -> $incomingNumber")
+            Log.e("CustomPhoneStateReceiver", "incoming number: $incomingNumber")
+            val channelId = "0"
+            NotificationCompat.Builder(context, channelId)
+                // Show controls on lock screen even when user hides sensitive content.
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                // Add media control buttons that invoke intents in your media service
+//                .addAction(R.drawable.ic_prev, "Previous", prevPendingIntent) // #0
+//                .addAction(R.drawable.ic_pause, "Pause", pausePendingIntent) // #1
+//                .addAction(R.drawable.ic_next, "Next", nextPendingIntent) // #2
+                // Apply the media style template
+//                .setStyle(MediaNotificationCompat.MediaStyle()
+//                    .setShowActionsInCompactView(1 /* #1: pause button \*/)
+//                    .setMediaSession(mediaSession.getSessionToken()))
+                .setContentTitle("수신 번호")
+                .setContentText("$incomingNumber")
+//                .setLargeIcon(R.drawable.ic_launcher_background)
+                .build()
+
             incomingNumber?.let { number ->
                 val (name, photoUri) = getCallerInfo(context, number)
                 onResult(number, name, photoUri)
@@ -27,6 +48,8 @@ class CustomPhoneStateReceiver(private val onResult: (String, String?, Uri?) -> 
     private fun getCallerInfo(context: Context, phoneNumber: String): Pair<String?, Uri?> {
         val uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber))
         val projection = arrayOf(ContactsContract.PhoneLookup.DISPLAY_NAME, ContactsContract.PhoneLookup.PHOTO_URI)
+
+        Log.e("getCallerInfo", "uri: $uri, projection: $projection")
 
         context.contentResolver.query(uri, projection, null, null, null).use { cursor ->
             if (cursor?.moveToFirst() == true) {
@@ -63,4 +86,6 @@ class CustomPhoneStateReceiver(private val onResult: (String, String?, Uri?) -> 
 
         return Pair(null, null)
     }
+
+
 }
